@@ -1,4 +1,4 @@
-import { getDb } from "../api/queries/connection";
+import { getDb } from "../server/queries/connection";
 import {
   cases,
   evidence,
@@ -71,7 +71,7 @@ async function seed() {
   console.log(`  ${insertedEntities.length} entities created`);
 
   // Map entity names to IDs
-  const entityMap = new Map(insertedEntities.map((e) => [e.name, e.id]));
+  const entityMap = new Map(insertedEntities.map((e: typeof insertedEntities[number]) => [e.name, e.id]));
   const getId = (name: string) => entityMap.get(name)!;
 
   // ── EVIDENCE ──────────────────────────────────────────
@@ -94,7 +94,7 @@ async function seed() {
   const insertedEvidence = await db.select().from(evidence).where(sql`case_id = ${caseId}`);
   console.log(`  ${insertedEvidence.length} evidence items created`);
 
-  const evidenceMap = new Map(insertedEvidence.map((e) => [e.title, e.id]));
+  const evidenceMap = new Map(insertedEvidence.map((e: typeof insertedEvidence[number]) => [e.title, e.id]));
   const getEvId = (title: string) => evidenceMap.get(title)!;
 
   // ── RELATIONSHIPS ─────────────────────────────────────
