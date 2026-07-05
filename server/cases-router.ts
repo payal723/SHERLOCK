@@ -1,7 +1,7 @@
 import { z } from "zod";
-import { createRouter, publicQuery } from "./middleware";
-import { getDb } from "./queries/connection";
-import { cases, evidence, entities, relationships, contradictions, cogneeLogs, investigationQueries } from "@db/schema";
+import { createRouter, publicQuery } from "./middleware.js";
+import { getDb } from "./queries/connection.js";
+import { cases, evidence, entities, relationships, contradictions, cogneeLogs, investigationQueries } from "../../db/schema.js";
 import { sql, eq, desc } from "drizzle-orm";
 
 export const casesRouter = createRouter({

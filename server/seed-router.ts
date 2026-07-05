@@ -1,5 +1,5 @@
-import { createRouter, publicQuery } from "./middleware";
-import { getDb } from "./queries/connection";
+import { createRouter, publicQuery } from "./middleware.js";
+import { getDb } from "./queries/connection.js";
 import {
   cases,
   evidence,
@@ -8,7 +8,7 @@ import {
   contradictions,
   cogneeLogs,
   investigationQueries,
-} from "@db/schema";
+} from "../../db/schema.js";
 import { sql } from "drizzle-orm";
 
 export const seedRouter = createRouter({

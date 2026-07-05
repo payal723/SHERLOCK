@@ -155,9 +155,25 @@ export default function QueryPanel({ queries }: QueryPanelProps) {
     }, 1500);
   };
 
-  const handleSuggested = (q: string) => {
+  const handleSuggested = (sq: string) => {
     if (isLoading) return;
-    setQuery(q);
+    setIsLoading(true);
+    setTimeout(() => {
+      const result = generateResponse(sq);
+      const newQuery: InvestigationQuery = {
+        id: Date.now(),
+        caseId: 1,
+        query: sq,
+        response: result.response,
+        reasoningPath: result.reasoningPath,
+        confidence: result.confidence,
+        evidenceChain: result.evidenceChain,
+        processingTime: Math.floor(Math.random() * 2000) + 1500,
+        createdAt: new Date(),
+      };
+      setLocalQueries((prev) => [...prev, newQuery]);
+      setIsLoading(false);
+    }, 1500);
   };
 
   return (
