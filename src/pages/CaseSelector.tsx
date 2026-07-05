@@ -57,7 +57,7 @@ export default function CaseSelector() {
     <div className="min-h-screen bg-[#0a0a0f] investigation-grid">
       {/* Header */}
       <header className="border-b border-white/5 bg-[#0a0a0f]/80 backdrop-blur-xl">
-        <div className="mx-auto max-w-7xl px-4 py-4 flex items-center justify-between">
+        <div className="mx-auto max-w-7xl px-3 md:px-4 py-3 md:py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="relative">
               <Shield className="h-8 w-8 text-blue-500" />
@@ -70,7 +70,7 @@ export default function CaseSelector() {
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="hidden sm:flex items-center gap-2">
             <Badge
               variant="outline"
               className="bg-blue-500/10 text-blue-400 border-blue-500/20"
@@ -90,7 +90,7 @@ export default function CaseSelector() {
       </header>
 
       {/* Main Content */}
-      <main className="mx-auto max-w-7xl px-4 py-8">
+      <main className="mx-auto max-w-7xl px-3 md:px-4 py-4 md:py-8">
         {/* Hero Stats */}
         <div className="mb-8 grid grid-cols-1 md:grid-cols-4 gap-4">
           <Card className="bg-[#0f0f18] border-white/5 glow-blue">
@@ -153,7 +153,7 @@ export default function CaseSelector() {
               Powered by Cognee — Hybrid Graph-Vector Memory System
             </h2>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 gap-3">
             {[
               { op: "remember", label: "Evidence Ingestion", desc: "Store & extract entities" },
               { op: "recall", label: "Multi-Hop Query", desc: "Graph traversal reasoning" },

@@ -10,8 +10,24 @@ import TimelineView from "@/components/TimelineView";
 import CogneePanel from "@/components/CogneePanel";
 import StatsOverlay from "@/components/StatsOverlay";
 import { mockFullCaseData, mockStats } from "@/lib/mockData";
+import {
+  Network,
+  FileText,
+  MessageSquareCode,
+  Clock,
+  BrainCircuit,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
 
 type TabType = "graph" | "evidence" | "query" | "timeline" | "cognee";
+
+const bottomTabs: { id: TabType; label: string; icon: typeof Network }[] = [
+  { id: "graph", label: "Graph", icon: Network },
+  { id: "evidence", label: "Evidence", icon: FileText },
+  { id: "query", label: "AI Query", icon: MessageSquareCode },
+  { id: "timeline", label: "Timeline", icon: Clock },
+  { id: "cognee", label: "Memory", icon: BrainCircuit },
+];
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -19,14 +35,15 @@ export default function Dashboard() {
   const [selectedNodeId, setSelectedNodeId] = useState<number | null>(null);
   const [selectedEvidenceId, setSelectedEvidenceId] = useState<number | null>(null);
 
-  // Use embedded mock data directly - no API calls needed
   const caseData = mockFullCaseData;
   const stats = mockStats;
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f] investigation-grid flex">
-      {/* Sidebar */}
-      <Sidebar activeTab={activeTab} onTabChange={setActiveTab} caseData={caseData} stats={stats} />
+    <div className="min-h-screen bg-[#0a0a0f] investigation-grid flex flex-col md:flex-row">
+      {/* Sidebar — hidden on mobile */}
+      <div className="hidden md:flex">
+        <Sidebar activeTab={activeTab} onTabChange={setActiveTab} caseData={caseData} stats={stats} />
+      </div>
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col min-h-screen overflow-hidden">
@@ -35,17 +52,16 @@ export default function Dashboard() {
 
         {/* Contradiction Alerts */}
         {caseData.contradictions.length > 0 && (
-          <div className="px-4 pt-2">
+          <div className="px-3 pt-2">
             <ContradictionAlert contradictions={caseData.contradictions} />
           </div>
         )}
 
         {/* Main View */}
-        <div className="flex-1 overflow-hidden relative">
-          {/* Stats Overlay */}
-          <StatsOverlay stats={stats} className="absolute top-2 right-2 z-10" />
+        <div className="flex-1 overflow-hidden relative pb-16 md:pb-0">
+          {/* Stats Overlay — hide on mobile */}
+          <StatsOverlay stats={stats} className="absolute top-2 right-2 z-10 hidden md:flex" />
 
-          {/* Tab Content */}
           {activeTab === "graph" && (
             <GraphViewer
               entities={caseData.entities}
@@ -54,7 +70,6 @@ export default function Dashboard() {
               onNodeSelect={setSelectedNodeId}
             />
           )}
-
           {activeTab === "evidence" && (
             <EvidencePanel
               evidence={caseData.evidence}
@@ -63,14 +78,9 @@ export default function Dashboard() {
               entities={caseData.entities}
             />
           )}
-
           {activeTab === "query" && (
-            <QueryPanel
-              caseId={1}
-              queries={caseData.queries}
-            />
+            <QueryPanel caseId={1} queries={caseData.queries} />
           )}
-
           {activeTab === "timeline" && (
             <TimelineView
               evidence={caseData.evidence}
@@ -78,12 +88,36 @@ export default function Dashboard() {
               relationships={caseData.relationships}
             />
           )}
-
           {activeTab === "cognee" && (
             <CogneePanel logs={caseData.cogneeLogs} caseId={1} />
           )}
         </div>
       </div>
+
+      {/* Mobile Bottom Navigation */}
+      <nav className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-[#0c0c14]/95 backdrop-blur-xl border-t border-white/10">
+        <div className="flex items-center justify-around px-1 py-2">
+          {bottomTabs.map((tab) => {
+            const Icon = tab.icon;
+            const isActive = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={cn(
+                  "flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-all min-w-0",
+                  isActive
+                    ? "text-blue-400 bg-blue-500/15"
+                    : "text-gray-500 hover:text-gray-300"
+                )}
+              >
+                <Icon className="h-5 w-5" />
+                <span className="text-[10px] font-medium truncate">{tab.label}</span>
+              </button>
+            );
+          })}
+        </div>
+      </nav>
     </div>
   );
 }

@@ -5,19 +5,11 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import {
-  FileText,
-  Camera,
-  Video,
-  MessageSquare,
-  FlaskConical,
-  Fingerprint,
-  Smartphone,
-  Scroll,
-  Mic,
-  HelpCircle,
-  CheckCircle2,
-  AlertCircle,
+  FileText, Camera, Video, MessageSquare, FlaskConical,
+  Fingerprint, Smartphone, Scroll, Mic, HelpCircle,
+  CheckCircle2, AlertCircle, ArrowLeft,
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import type { EvidenceItem, Entity } from "@/types/investigation";
 import { evidenceTypeLabels } from "@/types/investigation";
 
@@ -29,15 +21,9 @@ interface EvidencePanelProps {
 }
 
 const typeIcons: Record<string, typeof FileText> = {
-  statement: MessageSquare,
-  physical: Fingerprint,
-  digital: Smartphone,
-  forensic: FlaskConical,
-  cctv: Video,
-  photo: Camera,
-  document: Scroll,
-  audio: Mic,
-  other: HelpCircle,
+  statement: MessageSquare, physical: Fingerprint, digital: Smartphone,
+  forensic: FlaskConical, cctv: Video, photo: Camera,
+  document: Scroll, audio: Mic, other: HelpCircle,
 };
 
 const typeColors: Record<string, { bg: string; text: string; border: string }> = {
@@ -55,17 +41,21 @@ const typeColors: Record<string, { bg: string; text: string; border: string }> =
 export default function EvidencePanel({ evidence, selectedId, onSelect }: EvidencePanelProps) {
   const [filter, setFilter] = useState<string>("all");
 
-  const filtered =
-    filter === "all" ? evidence : evidence.filter((e) => e.evidenceType === filter);
-
+  const filtered = filter === "all" ? evidence : evidence.filter((e) => e.evidenceType === filter);
   const selected = evidence.find((e) => e.id === selectedId);
-
   const types = ["all", ...new Set(evidence.map((e) => e.evidenceType))];
 
   return (
     <div className="flex h-full">
-      {/* Evidence List */}
-      <div className="w-96 border-r border-white/5 flex flex-col">
+      {/* Evidence List — full width on mobile when nothing selected, 1/3 on desktop */}
+      <div
+        className={cn(
+          "border-r border-white/5 flex flex-col",
+          selected
+            ? "hidden md:flex md:w-80 lg:w-96"  // hide on mobile when item selected
+            : "w-full md:w-80 lg:w-96"
+        )}
+      >
         <div className="p-3 border-b border-white/5">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-sm font-semibold text-white flex items-center gap-2">
@@ -77,12 +67,12 @@ export default function EvidencePanel({ evidence, selectedId, onSelect }: Eviden
             </Badge>
           </div>
           <Tabs value={filter} onValueChange={setFilter}>
-            <TabsList className="w-full h-7 bg-white/5">
+            <TabsList className="w-full h-7 bg-white/5 overflow-x-auto">
               {types.map((t) => (
                 <TabsTrigger
                   key={t}
                   value={t}
-                  className="text-[10px] px-2 py-0.5 data-[state=active]:bg-blue-500/20 data-[state=active]:text-blue-400"
+                  className="text-[10px] px-2 py-0.5 shrink-0 data-[state=active]:bg-blue-500/20 data-[state=active]:text-blue-400"
                 >
                   {t === "all" ? "All" : evidenceTypeLabels[t as keyof typeof evidenceTypeLabels] ?? t}
                 </TabsTrigger>
@@ -110,21 +100,11 @@ export default function EvidencePanel({ evidence, selectedId, onSelect }: Eviden
                   )}
                 >
                   <div className="flex items-start gap-2.5">
-                    <div
-                      className={cn(
-                        "p-1.5 rounded-lg shrink-0",
-                        colors.bg
-                      )}
-                    >
+                    <div className={cn("p-1.5 rounded-lg shrink-0", colors.bg)}>
                       <Icon className={cn("h-3.5 w-3.5", colors.text)} />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p
-                        className={cn(
-                          "text-xs font-medium truncate",
-                          isSelected ? "text-blue-400" : "text-gray-300"
-                        )}
-                      >
+                      <p className={cn("text-xs font-medium truncate", isSelected ? "text-blue-400" : "text-gray-300")}>
                         {item.title}
                       </p>
                       <p className="text-[10px] text-gray-500 line-clamp-2 mt-0.5">
@@ -138,16 +118,10 @@ export default function EvidencePanel({ evidence, selectedId, onSelect }: Eviden
                           {evidenceTypeLabels[item.evidenceType as keyof typeof evidenceTypeLabels] ?? item.evidenceType}
                         </Badge>
                         {item.confidence !== null && (
-                          <span
-                            className={cn(
-                              "text-[9px]",
-                              item.confidence >= 0.9
-                                ? "text-green-400"
-                                : item.confidence >= 0.7
-                                ? "text-yellow-400"
-                                : "text-red-400"
-                            )}
-                          >
+                          <span className={cn(
+                            "text-[9px]",
+                            item.confidence >= 0.9 ? "text-green-400" : item.confidence >= 0.7 ? "text-yellow-400" : "text-red-400"
+                          )}>
                             {Math.round(item.confidence * 100)}%
                           </span>
                         )}
@@ -162,157 +136,129 @@ export default function EvidencePanel({ evidence, selectedId, onSelect }: Eviden
       </div>
 
       {/* Evidence Detail */}
-      <div className="flex-1 p-4 overflow-auto">
+      <div className={cn(
+        "flex-1 overflow-auto",
+        selected ? "block" : "hidden md:block"
+      )}>
         {selected ? (
-          <Card className="bg-[#0f0f18] border-white/5">
-            <CardHeader className="pb-3">
-              <div className="flex items-start justify-between">
-                <div className="flex items-center gap-3">
-                  <div
-                    className={cn(
-                      "p-2 rounded-lg",
-                      (typeColors[selected.evidenceType] ?? typeColors.other).bg
-                    )}
-                  >
-                    {((): any => {
-                      const Icon =
-                        typeIcons[selected.evidenceType] ?? HelpCircle;
-                      return (
-                        <Icon
+          <div className="p-3 md:p-4">
+            {/* Mobile back button */}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => onSelect(null as any)}
+              className="md:hidden mb-3 text-gray-400 hover:text-white -ml-1"
+            >
+              <ArrowLeft className="h-4 w-4 mr-1" />
+              Back to Evidence
+            </Button>
+
+            <Card className="bg-[#0f0f18] border-white/5">
+              <CardHeader className="pb-3">
+                <div className="flex items-start justify-between gap-2 flex-wrap">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className={cn("p-2 rounded-lg shrink-0", (typeColors[selected.evidenceType] ?? typeColors.other).bg)}>
+                      {((): any => {
+                        const Icon = typeIcons[selected.evidenceType] ?? HelpCircle;
+                        return <Icon className={cn("h-5 w-5", (typeColors[selected.evidenceType] ?? typeColors.other).text)} />;
+                      })()}
+                    </div>
+                    <div className="min-w-0">
+                      <h2 className="text-sm md:text-base font-semibold text-white">{selected.title}</h2>
+                      <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                        <Badge
+                          variant="outline"
                           className={cn(
-                            "h-5 w-5",
-                            (typeColors[selected.evidenceType] ?? typeColors.other).text
+                            "text-[10px]",
+                            (typeColors[selected.evidenceType] ?? typeColors.other).bg,
+                            (typeColors[selected.evidenceType] ?? typeColors.other).text,
+                            (typeColors[selected.evidenceType] ?? typeColors.other).border
                           )}
-                        />
-                      );
-                    })()}
-                  </div>
-                  <div>
-                    <h2 className="text-base font-semibold text-white">{selected.title}</h2>
-                    <div className="flex items-center gap-2 mt-0.5">
-                      <Badge
-                        variant="outline"
-                        className={cn(
-                          "text-[10px]",
-                          (typeColors[selected.evidenceType] ?? typeColors.other).bg,
-                          (typeColors[selected.evidenceType] ?? typeColors.other).text,
-                          (typeColors[selected.evidenceType] ?? typeColors.other).border
+                        >
+                          {evidenceTypeLabels[selected.evidenceType as keyof typeof evidenceTypeLabels] ?? selected.evidenceType}
+                        </Badge>
+                        {selected.source && (
+                          <span className="text-xs text-gray-500">Source: {selected.source}</span>
                         )}
-                      >
-                        {evidenceTypeLabels[selected.evidenceType as keyof typeof evidenceTypeLabels] ??
-                          selected.evidenceType}
-                      </Badge>
-                      {selected.source && (
-                        <span className="text-xs text-gray-500">Source: {selected.source}</span>
-                      )}
+                      </div>
                     </div>
                   </div>
-                </div>
-                <div className="flex items-center gap-2">
                   {selected.confidence !== null && (
-                    <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-white/5">
-                      {selected.confidence >= 0.9 ? (
-                        <CheckCircle2 className="h-3.5 w-3.5 text-green-400" />
-                      ) : (
-                        <AlertCircle className="h-3.5 w-3.5 text-yellow-400" />
-                      )}
-                      <span
-                        className={cn(
-                          "text-xs font-medium",
-                          selected.confidence >= 0.9
-                            ? "text-green-400"
-                            : selected.confidence >= 0.7
-                            ? "text-yellow-400"
-                            : "text-red-400"
-                        )}
-                      >
-                        {Math.round(selected.confidence * 100)}% confidence
+                    <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-white/5 shrink-0">
+                      {selected.confidence >= 0.9
+                        ? <CheckCircle2 className="h-3.5 w-3.5 text-green-400" />
+                        : <AlertCircle className="h-3.5 w-3.5 text-yellow-400" />}
+                      <span className={cn("text-xs font-medium",
+                        selected.confidence >= 0.9 ? "text-green-400"
+                          : selected.confidence >= 0.7 ? "text-yellow-400" : "text-red-400"
+                      )}>
+                        {Math.round(selected.confidence * 100)}%
                       </span>
                     </div>
                   )}
                 </div>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {/* Description */}
-              <div>
-                <h4 className="text-[10px] text-gray-500 uppercase tracking-wider mb-1.5">
-                  Description
-                </h4>
-                <p className="text-sm text-gray-300 leading-relaxed whitespace-pre-wrap">
-                  {selected.description}
-                </p>
-              </div>
-
-              {/* Metadata */}
-              <div className="grid grid-cols-3 gap-3">
-                {selected.timestamp && (
-                  <div className="p-2.5 rounded-lg bg-white/[0.02] border border-white/5">
-                    <p className="text-[10px] text-gray-500 mb-0.5">Timestamp</p>
-                    <p className="text-xs text-gray-300">{selected.timestamp}</p>
-                  </div>
-                )}
-                {selected.source && (
-                  <div className="p-2.5 rounded-lg bg-white/[0.02] border border-white/5">
-                    <p className="text-[10px] text-gray-500 mb-0.5">Source</p>
-                    <p className="text-xs text-gray-300">{selected.source}</p>
-                  </div>
-                )}
-                <div className="p-2.5 rounded-lg bg-white/[0.02] border border-white/5">
-                  <p className="text-[10px] text-gray-500 mb-0.5">Added</p>
-                  <p className="text-xs text-gray-300">
-                    {new Date(selected.createdAt).toLocaleDateString()}
-                  </p>
-                </div>
-              </div>
-
-              {/* Confidence visualization */}
-              {selected.confidence !== null && (
+              </CardHeader>
+              <CardContent className="space-y-4">
                 <div>
-                  <h4 className="text-[10px] text-gray-500 uppercase tracking-wider mb-2">
-                    Confidence Analysis
-                  </h4>
-                  <div className="p-3 rounded-lg bg-white/[0.02] border border-white/5">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-xs text-gray-400">Evidence Reliability</span>
-                      <span
-                        className={cn(
-                          "text-sm font-bold",
-                          selected.confidence >= 0.9
-                            ? "text-green-400"
-                            : selected.confidence >= 0.7
-                            ? "text-yellow-400"
-                            : "text-red-400"
-                        )}
-                      >
-                        {Math.round(selected.confidence * 100)}%
-                      </span>
+                  <h4 className="text-[10px] text-gray-500 uppercase tracking-wider mb-1.5">Description</h4>
+                  <p className="text-sm text-gray-300 leading-relaxed whitespace-pre-wrap">{selected.description}</p>
+                </div>
+
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                  {selected.timestamp && (
+                    <div className="p-2.5 rounded-lg bg-white/[0.02] border border-white/5">
+                      <p className="text-[10px] text-gray-500 mb-0.5">Timestamp</p>
+                      <p className="text-xs text-gray-300">{selected.timestamp}</p>
                     </div>
-                    <div className="h-2 bg-white/5 rounded-full overflow-hidden">
-                      <div
-                        className={cn(
-                          "h-full rounded-full transition-all",
-                          selected.confidence >= 0.9
-                            ? "bg-gradient-to-r from-green-500 to-green-400"
-                            : selected.confidence >= 0.7
-                            ? "bg-gradient-to-r from-yellow-500 to-yellow-400"
-                            : "bg-gradient-to-r from-red-500 to-red-400"
-                        )}
-                        style={{ width: `${selected.confidence * 100}%` }}
-                      />
+                  )}
+                  {selected.source && (
+                    <div className="p-2.5 rounded-lg bg-white/[0.02] border border-white/5">
+                      <p className="text-[10px] text-gray-500 mb-0.5">Source</p>
+                      <p className="text-xs text-gray-300">{selected.source}</p>
                     </div>
-                    <p className="text-[10px] text-gray-500 mt-2">
-                      {selected.confidence >= 0.9
-                        ? "High-confidence evidence with strong corroboration"
-                        : selected.confidence >= 0.7
-                        ? "Moderate confidence — additional verification recommended"
-                        : "Low confidence — this evidence may be unreliable or contradictory"}
-                    </p>
+                  )}
+                  <div className="p-2.5 rounded-lg bg-white/[0.02] border border-white/5">
+                    <p className="text-[10px] text-gray-500 mb-0.5">Added</p>
+                    <p className="text-xs text-gray-300">{new Date(selected.createdAt).toLocaleDateString()}</p>
                   </div>
                 </div>
-              )}
-            </CardContent>
-          </Card>
+
+                {selected.confidence !== null && (
+                  <div>
+                    <h4 className="text-[10px] text-gray-500 uppercase tracking-wider mb-2">Confidence Analysis</h4>
+                    <div className="p-3 rounded-lg bg-white/[0.02] border border-white/5">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-xs text-gray-400">Evidence Reliability</span>
+                        <span className={cn("text-sm font-bold",
+                          selected.confidence >= 0.9 ? "text-green-400"
+                            : selected.confidence >= 0.7 ? "text-yellow-400" : "text-red-400"
+                        )}>
+                          {Math.round(selected.confidence * 100)}%
+                        </span>
+                      </div>
+                      <div className="h-2 bg-white/5 rounded-full overflow-hidden">
+                        <div
+                          className={cn("h-full rounded-full transition-all",
+                            selected.confidence >= 0.9 ? "bg-gradient-to-r from-green-500 to-green-400"
+                              : selected.confidence >= 0.7 ? "bg-gradient-to-r from-yellow-500 to-yellow-400"
+                              : "bg-gradient-to-r from-red-500 to-red-400"
+                          )}
+                          style={{ width: `${selected.confidence * 100}%` }}
+                        />
+                      </div>
+                      <p className="text-[10px] text-gray-500 mt-2">
+                        {selected.confidence >= 0.9
+                          ? "High-confidence evidence with strong corroboration"
+                          : selected.confidence >= 0.7
+                          ? "Moderate confidence — additional verification recommended"
+                          : "Low confidence — this evidence may be unreliable or contradictory"}
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
         ) : (
           <div className="h-full flex items-center justify-center">
             <div className="text-center">
